@@ -53,38 +53,12 @@ export default function GameWrapper({ children, textNext, onNext, manager, gameE
         )}
 
         {manager && (
-          <>
-            <Button
-              className="self-end bg-white px-4 !text-black relative z-50"
-              onClick={() => onNext()}
-            >
-              {textNext}
-            </Button>
-            
-            {/* Дополнительные кнопки для навигации менеджера только после завершения игры */}
-            {gameEnded && window.location.pathname === '/manager' && (
-              <div className="flex gap-2 relative z-50">
-                <Button
-                  className="self-end bg-primary px-4 text-white"
-                  onClick={() => {
-                    console.log("Прямой переход к полному лидерборду");
-                    socket.emit("manager:showFullLeaderboard");
-                  }}
-                >
-                  Лидерборд
-                </Button>
-                <Button
-                  className="self-end bg-primary px-4 text-white"
-                  onClick={() => {
-                    console.log("Прямой переход к подиуму");
-                    socket.emit("manager:showPodium");
-                  }}
-                >
-                  Подиум
-                </Button>
-              </div>
-            )}
-          </>
+          <Button
+            className="self-end bg-white px-4 !text-black relative z-50"
+            onClick={() => onNext()}
+          >
+            {textNext}
+          </Button>
         )}
       </div>
 

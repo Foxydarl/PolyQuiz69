@@ -8,9 +8,11 @@ import {
   SFX_ANSWERS_MUSIC,
   SFX_ANSWERS_SOUND,
   SFX_RESULTS_SOUND,
+  SFX_POP_SOUND,
 } from "@/constants"
 import useSound from "use-sound"
 import { usePlayerContext } from "@/context/player"
+import Button from "@/components/Button"
 
 const calculatePercentages = (objectResponses) => {
   const keys = Object.keys(objectResponses)
@@ -43,10 +45,10 @@ export default function Answers({
   const [percentages, setPercentages] = useState([])
   const [cooldown, setCooldown] = useState(time)
   const [totalAnswer, setTotalAnswer] = useState(0)
+  const [autoSkipTimer, setAutoSkipTimer] = useState(null)
+  const [isAutoSkipEnabled, setIsAutoSkipEnabled] = useState(true)
 
-  const [sfxPop] = useSound(SFX_ANSWERS_SOUND, {
-    volume: 0.1,
-  })
+  const [sfxPop] = useSound(SFX_POP_SOUND, { volume: 0.2 })
 
   const [sfxResults] = useSound(SFX_RESULTS_SOUND, {
     volume: 0.2,
@@ -108,6 +110,37 @@ export default function Answers({
     }
   }, [sfxPop])
 
+  useEffect(() => {
+    if (isAutoSkipEnabled) {
+      const timer = setInterval(() => {
+        setCooldown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer)
+            socket.emit("manager:showLeaderboard")
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+
+      setAutoSkipTimer(timer)
+    }
+
+    return () => {
+      if (autoSkipTimer) {
+        clearInterval(autoSkipTimer)
+      }
+    }
+  }, [isAutoSkipEnabled, socket])
+
+  const handleCancelAutoSkip = () => {
+    setIsAutoSkipEnabled(false)
+    if (autoSkipTimer) {
+      clearInterval(autoSkipTimer)
+      setAutoSkipTimer(null)
+    }
+  }
+
   return (
     <div className="flex h-full flex-1 flex-col justify-between">
       <div className="mx-auto inline-flex h-full w-full max-w-7xl flex-1 flex-col items-center justify-center gap-5">
@@ -139,6 +172,20 @@ export default function Answers({
             ))}
           </div>
         )}
+
+        <div className="fixed bottom-4 right-4 flex items-center gap-4">
+          {isAutoSkipEnabled && (
+            <div className="bg-black/50 px-4 py-2 rounded-lg text-white text-xl">
+              Автопропуск через {cooldown}
+            </div>
+          )}
+          <Button
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+            onClick={handleCancelAutoSkip}
+          >
+            Отмена
+          </Button>
+        </div>
       </div>
 
       <div>
