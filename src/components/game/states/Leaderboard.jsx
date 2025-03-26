@@ -1,8 +1,43 @@
 import { useSocketContext } from "@/context/socket"
+import { useEffect, useRef, useState } from "react"
 import Button from "@/components/Button"
 
 export default function Leaderboard({ data: { leaderboard, totalQuestions, isFinal } }) {
   const { socket } = useSocketContext()
+  const [autoSkipCountdown, setAutoSkipCountdown] = useState(3)
+  const [isAutoSkipEnabled, setIsAutoSkipEnabled] = useState(true)
+  const autoSkipTimerRef = useRef(null)
+
+  useEffect(() => {
+    // Автоскип только если это не финальная таблица
+    if (!isFinal && isAutoSkipEnabled) {
+      setAutoSkipCountdown(3)
+      autoSkipTimerRef.current = setInterval(() => {
+        setAutoSkipCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(autoSkipTimerRef.current)
+            socket.emit("manager:nextQuestion")
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+
+    return () => {
+      if (autoSkipTimerRef.current) {
+        clearInterval(autoSkipTimerRef.current)
+      }
+    }
+  }, [isAutoSkipEnabled, socket, isFinal])
+
+  const handleCancelAutoSkip = () => {
+    setIsAutoSkipEnabled(false)
+    if (autoSkipTimerRef.current) {
+      clearInterval(autoSkipTimerRef.current)
+      autoSkipTimerRef.current = null
+    }
+  }
 
   return (
     <section className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-2">
@@ -23,6 +58,22 @@ export default function Leaderboard({ data: { leaderboard, totalQuestions, isFin
           </div>
         ))}
       </div>
+
+      {!isFinal && (
+        <div className="fixed bottom-4 right-4 flex items-center gap-4">
+          {isAutoSkipEnabled && (
+            <div className="bg-black/50 px-4 py-2 rounded-lg text-white text-xl">
+              Автопропуск через {autoSkipCountdown}
+            </div>
+          )}
+          <Button
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+            onClick={handleCancelAutoSkip}
+          >
+            Отмена
+          </Button>
+        </div>
+      )}
     </section>
   )
 }
