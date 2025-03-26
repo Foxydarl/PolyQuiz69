@@ -46,23 +46,13 @@ export default function Answers({
   const [questionTimer, setQuestionTimer] = useState(time)
   const [autoSkipCountdown, setAutoSkipCountdown] = useState(3)
   const [totalAnswer, setTotalAnswer] = useState(0)
-  const [autoSkipTimer, setAutoSkipTimer] = useState(null)
   const [isAutoSkipEnabled, setIsAutoSkipEnabled] = useState(true)
   const questionTimerRef = useRef(null)
   const autoSkipTimerRef = useRef(null)
 
   const [sfxPop] = useSound(SFX_POP_SOUND, { volume: 0.2 })
-
-  const [sfxResults] = useSound(SFX_RESULTS_SOUND, {
-    volume: 0.2,
-  })
-
-  const [playMusic, { stop: stopMusic, isPlaying }] = useSound(
-    SFX_ANSWERS_MUSIC,
-    {
-      volume: 0.2,
-    },
-  )
+  const [sfxResults] = useSound(SFX_RESULTS_SOUND, { volume: 0.2 })
+  const [playMusic, { stop: stopMusic, isPlaying }] = useSound(SFX_ANSWERS_MUSIC, { volume: 0.2 })
 
   const handleAnswer = (answer) => {
     if (!player) {
@@ -81,7 +71,6 @@ export default function Answers({
 
     stopMusic()
     sfxResults()
-
     setPercentages(calculatePercentages(responses))
   }, [responses, playMusic, stopMusic])
 
@@ -105,6 +94,7 @@ export default function Answers({
         setQuestionTimer((prev) => {
           if (prev <= 1) {
             clearInterval(questionTimerRef.current)
+            socket.emit("manager:showLeaderboard")
             return 0
           }
           return prev - 1
@@ -117,9 +107,9 @@ export default function Answers({
         clearInterval(questionTimerRef.current)
       }
     }
-  }, [time, responses])
+  }, [time, responses, socket])
 
-  // Таймер для автоскипа
+  // Таймер для автоскипа после показа ответов
   useEffect(() => {
     if (responses && isAutoSkipEnabled) {
       setAutoSkipCountdown(3)
