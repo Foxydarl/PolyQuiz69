@@ -1,5 +1,5 @@
-export const WEBSOCKET_PUBLIC_URL = "http://localhost:5505/"
-export const WEBSOCKET_SERVER_PORT = 5505
+export const WEBSOCKET_PUBLIC_URL = "http://polyquiz.aspc.kz:7659/"
+export const WEBSOCKET_SERVER_PORT = 7659
 
 const QUIZZ_CONFIG = {
   password: "PASSWORD",

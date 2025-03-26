@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 7658",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 7658",
     "socket": "node ./socket/index.js",
     "all": "npm run build && concurrently --kill-others \"npm run start\" \"npm run socket\"",
     "all-dev": "concurrently --kill-others \"npm run dev\" \"npm run socket\"",
