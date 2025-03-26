@@ -123,7 +123,8 @@ export default function Answers({
         setAutoSkipCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(autoSkipTimerRef.current)
-            socket.emit("manager:nextQuestion")
+            // Сначала показываем таблицу лидеров
+            socket.emit("manager:showLeaderboard")
             return 0
           }
           return prev - 1
