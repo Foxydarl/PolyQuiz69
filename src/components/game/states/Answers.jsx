@@ -43,11 +43,13 @@ export default function Answers({
   const { player } = usePlayerContext()
 
   const [percentages, setPercentages] = useState([])
-  const [cooldown, setCooldown] = useState(time)
+  const [questionTimer, setQuestionTimer] = useState(time)
   const [autoSkipCountdown, setAutoSkipCountdown] = useState(3)
   const [totalAnswer, setTotalAnswer] = useState(0)
   const [autoSkipTimer, setAutoSkipTimer] = useState(null)
   const [isAutoSkipEnabled, setIsAutoSkipEnabled] = useState(true)
+  const questionTimerRef = useRef(null)
+  const autoSkipTimerRef = useRef(null)
 
   const [sfxPop] = useSound(SFX_POP_SOUND, { volume: 0.2 })
 
@@ -95,54 +97,67 @@ export default function Answers({
     }
   }, [playMusic, stopMusic])
 
+  // Таймер для основного времени вопроса
   useEffect(() => {
-    socket.on("game:cooldown", (sec) => {
-      setCooldown(sec)
-    })
-
-    socket.on("game:playerAnswer", (count) => {
-      setTotalAnswer(count)
-      sfxPop()
-    })
+    if (!responses) {
+      setQuestionTimer(time)
+      questionTimerRef.current = setInterval(() => {
+        setQuestionTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(questionTimerRef.current)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
 
     return () => {
-      socket.off("game:cooldown")
-      socket.off("game:playerAnswer")
+      if (questionTimerRef.current) {
+        clearInterval(questionTimerRef.current)
+      }
     }
-  }, [sfxPop])
+  }, [time, responses])
 
+  // Таймер для автоскипа
   useEffect(() => {
-    // Сбрасываем автоскип при каждом новом вопросе
-    setAutoSkipCountdown(3)
-    setIsAutoSkipEnabled(true)
-    
-    if (isAutoSkipEnabled && responses) {
-      const timer = setInterval(() => {
+    if (responses && isAutoSkipEnabled) {
+      setAutoSkipCountdown(3)
+      autoSkipTimerRef.current = setInterval(() => {
         setAutoSkipCountdown((prev) => {
           if (prev <= 1) {
-            clearInterval(timer)
+            clearInterval(autoSkipTimerRef.current)
             socket.emit("manager:showLeaderboard")
             return 0
           }
           return prev - 1
         })
       }, 1000)
-
-      setAutoSkipTimer(timer)
     }
 
     return () => {
-      if (autoSkipTimer) {
-        clearInterval(autoSkipTimer)
+      if (autoSkipTimerRef.current) {
+        clearInterval(autoSkipTimerRef.current)
       }
     }
-  }, [isAutoSkipEnabled, socket, responses])
+  }, [responses, isAutoSkipEnabled, socket])
+
+  useEffect(() => {
+    socket.on("game:playerAnswer", (count) => {
+      setTotalAnswer(count)
+      sfxPop()
+    })
+
+    return () => {
+      socket.off("game:playerAnswer")
+    }
+  }, [sfxPop])
 
   const handleCancelAutoSkip = () => {
     setIsAutoSkipEnabled(false)
-    if (autoSkipTimer) {
-      clearInterval(autoSkipTimer)
-      setAutoSkipTimer(null)
+    if (autoSkipTimerRef.current) {
+      clearInterval(autoSkipTimerRef.current)
+      autoSkipTimerRef.current = null
     }
   }
 
@@ -200,7 +215,7 @@ export default function Answers({
           <div className="mx-auto mb-4 flex w-full max-w-7xl justify-between gap-1 px-2 text-lg font-bold text-white md:text-xl">
             <div className="flex flex-col items-center rounded-full bg-black/40 px-4 text-lg font-bold">
               <span className="translate-y-1 text-sm">Time</span>
-              <span>{cooldown}</span>
+              <span>{questionTimer}</span>
             </div>
             <div className="flex flex-col items-center rounded-full bg-black/40 px-4 text-lg font-bold">
               <span className="translate-y-1 text-sm">Answers</span>
