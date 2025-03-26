@@ -112,6 +112,12 @@ export default function Answers({
   // Таймер для автоскипа после показа ответов
   useEffect(() => {
     if (responses && isAutoSkipEnabled) {
+      // Очищаем основной таймер, если он еще работает
+      if (questionTimerRef.current) {
+        clearInterval(questionTimerRef.current)
+        questionTimerRef.current = null
+      }
+      
       setAutoSkipCountdown(3)
       autoSkipTimerRef.current = setInterval(() => {
         setAutoSkipCountdown((prev) => {
