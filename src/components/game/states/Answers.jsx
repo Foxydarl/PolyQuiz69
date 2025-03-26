@@ -43,7 +43,7 @@ export default function Answers({
   const { player } = usePlayerContext()
 
   const [percentages, setPercentages] = useState([])
-  const [cooldown, setCooldown] = useState(time)
+  const [cooldown, setCooldown] = useState(5)
   const [totalAnswer, setTotalAnswer] = useState(0)
   const [autoSkipTimer, setAutoSkipTimer] = useState(null)
   const [isAutoSkipEnabled, setIsAutoSkipEnabled] = useState(true)
@@ -111,7 +111,7 @@ export default function Answers({
   }, [sfxPop])
 
   useEffect(() => {
-    if (isAutoSkipEnabled) {
+    if (isAutoSkipEnabled && responses) {
       const timer = setInterval(() => {
         setCooldown((prev) => {
           if (prev <= 1) {
@@ -131,7 +131,7 @@ export default function Answers({
         clearInterval(autoSkipTimer)
       }
     }
-  }, [isAutoSkipEnabled, socket])
+  }, [isAutoSkipEnabled, socket, responses])
 
   const handleCancelAutoSkip = () => {
     setIsAutoSkipEnabled(false)
@@ -173,19 +173,21 @@ export default function Answers({
           </div>
         )}
 
-        <div className="fixed bottom-4 right-4 flex items-center gap-4">
-          {isAutoSkipEnabled && (
-            <div className="bg-black/50 px-4 py-2 rounded-lg text-white text-xl">
-              Автопропуск через {cooldown}
-            </div>
-          )}
-          <Button
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
-            onClick={handleCancelAutoSkip}
-          >
-            Отмена
-          </Button>
-        </div>
+        {responses && (
+          <div className="fixed bottom-4 right-4 flex items-center gap-4">
+            {isAutoSkipEnabled && (
+              <div className="bg-black/50 px-4 py-2 rounded-lg text-white text-xl">
+                Автопропуск через {cooldown}
+              </div>
+            )}
+            <Button
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+              onClick={handleCancelAutoSkip}
+            >
+              Отмена
+            </Button>
+          </div>
+        )}
       </div>
 
       <div>
