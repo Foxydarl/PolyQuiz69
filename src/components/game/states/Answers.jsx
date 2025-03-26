@@ -117,7 +117,7 @@ export default function Answers({
         setAutoSkipCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(autoSkipTimerRef.current)
-            socket.emit("manager:showLeaderboard")
+            socket.emit("manager:nextQuestion")
             return 0
           }
           return prev - 1
