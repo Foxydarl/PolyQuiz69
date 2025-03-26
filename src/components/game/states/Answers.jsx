@@ -112,6 +112,10 @@ export default function Answers({
   }, [sfxPop])
 
   useEffect(() => {
+    // Сбрасываем автоскип при каждом новом вопросе
+    setAutoSkipCountdown(3)
+    setIsAutoSkipEnabled(true)
+    
     if (isAutoSkipEnabled && responses) {
       const timer = setInterval(() => {
         setAutoSkipCountdown((prev) => {
