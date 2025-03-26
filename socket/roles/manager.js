@@ -122,6 +122,7 @@ const Manager = {
             return b.points - a.points
           }),
         totalQuestions: game.questions.length,
+        isFinal: false
       },
     })
   },
