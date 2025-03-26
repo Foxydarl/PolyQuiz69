@@ -73,10 +73,7 @@ const Manager = {
       return
     }
 
-    if (game.currentQuestion > 0) {
-      game.currentQuestion++
-    }
-    
+    game.currentQuestion++
     startRound(game, io, socket)
   },
 
