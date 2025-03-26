@@ -43,7 +43,8 @@ export default function Answers({
   const { player } = usePlayerContext()
 
   const [percentages, setPercentages] = useState([])
-  const [cooldown, setCooldown] = useState(3)
+  const [cooldown, setCooldown] = useState(time)
+  const [autoSkipCountdown, setAutoSkipCountdown] = useState(3)
   const [totalAnswer, setTotalAnswer] = useState(0)
   const [autoSkipTimer, setAutoSkipTimer] = useState(null)
   const [isAutoSkipEnabled, setIsAutoSkipEnabled] = useState(true)
@@ -113,7 +114,7 @@ export default function Answers({
   useEffect(() => {
     if (isAutoSkipEnabled && responses) {
       const timer = setInterval(() => {
-        setCooldown((prev) => {
+        setAutoSkipCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timer)
             socket.emit("manager:showLeaderboard")
@@ -177,7 +178,7 @@ export default function Answers({
           <div className="fixed bottom-4 right-4 flex items-center gap-4">
             {isAutoSkipEnabled && (
               <div className="bg-black/50 px-4 py-2 rounded-lg text-white text-xl">
-                Автопропуск через {cooldown}
+                Автопропуск через {autoSkipCountdown}
               </div>
             )}
             <Button
