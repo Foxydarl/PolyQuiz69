@@ -43,7 +43,7 @@ export default function Answers({
   const { player } = usePlayerContext()
 
   const [percentages, setPercentages] = useState([])
-  const [cooldown, setCooldown] = useState(5)
+  const [cooldown, setCooldown] = useState(3)
   const [totalAnswer, setTotalAnswer] = useState(0)
   const [autoSkipTimer, setAutoSkipTimer] = useState(null)
   const [isAutoSkipEnabled, setIsAutoSkipEnabled] = useState(true)
