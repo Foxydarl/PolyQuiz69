@@ -60,22 +60,38 @@ const Manager = {
     startRound(game, io, socket)
   },
 
-  nextQuestion: (game, io, socket) => {
-    if (!game.started) {
-      return
-    }
+  nextQuestion: (function() {
+    // Переменные для дебаунса внутри замыкания
+    let lastQuestionChangeTime = 0;
+    const DEBOUNCE_TIME = 1000; // 1 секунда дебаунса
+    
+    return function(game, io, socket) {
+      if (!game.started) {
+        return
+      }
 
-    if (socket.id !== game.manager) {
-      return
-    }
+      if (socket.id !== game.manager) {
+        return
+      }
 
-    if (!game.questions[game.currentQuestion + 1]) {
-      return
-    }
+      if (!game.questions[game.currentQuestion + 1]) {
+        return
+      }
 
-    game.currentQuestion++
-    startRound(game, io, socket)
-  },
+      // Проверка времени последнего вызова для предотвращения двойных кликов
+      const now = Date.now();
+      if (now - lastQuestionChangeTime < DEBOUNCE_TIME) {
+        console.log("nextQuestion вызван слишком быстро, игнорируем");
+        return;
+      }
+      
+      lastQuestionChangeTime = now;
+      
+      // Переходим к следующему вопросу
+      game.currentQuestion++
+      startRound(game, io, socket)
+    }
+  })(),
 
   abortQuiz: (game, io, socket) => {
     if (!game.started) {

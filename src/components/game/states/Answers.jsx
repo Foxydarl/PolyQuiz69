@@ -123,7 +123,8 @@ export default function Answers({
         setAutoSkipCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(autoSkipTimerRef.current)
-            // Сначала показываем таблицу лидеров
+            autoSkipTimerRef.current = null
+            // Переходим на таблицу лидеров
             socket.emit("manager:showLeaderboard")
             return 0
           }
@@ -135,6 +136,7 @@ export default function Answers({
     return () => {
       if (autoSkipTimerRef.current) {
         clearInterval(autoSkipTimerRef.current)
+        autoSkipTimerRef.current = null
       }
     }
   }, [responses, isAutoSkipEnabled, socket])
